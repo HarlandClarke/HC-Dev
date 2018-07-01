@@ -1,2 +1,65 @@
 # HC-Dev
 Harland Clarke Development Proxy for use in local dev testing of front end websites
+
+## How To Use
+1. Configuration is accomplished by using the hcdev.config.js config file
+2. Implementaiton is performed by using the BrowserSync configuration export
+
+### Configuration File (hcdev.config.js)
+Configure your local project by placing hcdev.config.js in the root of the project alongside package.json
+
+The file format should be something like the following:
+
+`hcdev.config.js`
+``` js
+module.exports = {
+
+  // Proxy Port
+  port: 3000,
+
+  // URLs to serve up on localhost
+  urls: [
+    'https://uat.SomeHCFrontEndSite.com'
+  ],
+
+  // Local Routes to override
+  localRoutes: [
+    {
+      route: '/resources/store/configurator/promo_products',
+      dir: './dist'
+    }
+  ]
+}
+```
+
+#### Port
+Defines the proxy port which should host the local dev server site
+
+#### urls
+Array defining the url of the website(s) to proxy
+
+#### localRoutes
+Array defining the routes to expose local build files which override files hosted on the front end site being proxied
+
+### BrowerSync Configuration
+In order to use this utility, you must be using BrowserSync and use the GetBrowserSyncConfig command to generate an appropriate configuration for BrowserSync from the config file mentioned above. An example of how this can be done can be seen below, using the Vue-CLI config file to reference the incorporate the HC-Dev platform.
+
+``` js
+
+const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
+const HCDev = require('hc-dev');
+const hcDev = new HCDev();
+
+module.exports = {
+  lintOnSave: false,
+  configureWebpack: {
+    output: {
+      path: __dirname + "/dist"
+    },
+    plugins: [
+      new BrowserSyncPlugin(hcDev.GetBrowserSyncConfig())
+    ]
+  }
+}
+
+```
