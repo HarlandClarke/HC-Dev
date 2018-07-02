@@ -55,7 +55,7 @@ function HCDev() {
     });
 
     // Remove Bazaarvoice
-    finalBody = finalBody.replace(/bazaarvoice.com/g, "localhost:3000");
+    finalBody = finalBody.replace(/bazaarvoice.com/g, "localhost:" + this.config.port);
 
     return finalBody;
   }
