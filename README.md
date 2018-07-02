@@ -17,18 +17,42 @@ module.exports = {
   // Proxy Port
   port: 3000,
 
-  // URLs to serve up on localhost
+  // Proxy agent to use (optional)
+  agent: new ProxyAgent('pac+http://someproxyserver.hosted.com/proxy.PAC'),
+
+  // URLs to serve up on localhost (optional)
   urls: [
     'https://uat.SomeHCFrontEndSite.com'
   ],
 
-  // Local Routes to override
+  // Local Routes to override (optional)
   localRoutes: [
     {
       route: '/resources/store/configurator/promo_products',
       dir: './dist'
     }
-  ]
+  ],
+
+  // Match Patterns for defining additional matches the request should be processed for.
+  matchPatterns: [
+    'example.txt',
+    '/someDirectory/example.html'
+  ],
+
+  // Custom Clean Body Response Function (optional)
+  customCleanBodyResponse: (config, req, host, finalBody) => {
+
+    // Modify js enviro param to be Dev
+    let configHostRegex = new RegExp("config[\"host\"] = {\"env\":\"UAT\"}");
+    finalBody = finalBody.replace(configHostRegex, "config[\"host\"] = {\"env\":\"DEV\"}");
+
+    // Adjust Bazaarvoice
+    finalBody = finalBody.replace(/bazaarvoice.com/g, "localhost:" + config.port);
+
+    // Return the final body
+    return finalBody;
+
+  }
 }
 ```
 

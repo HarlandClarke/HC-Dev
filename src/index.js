@@ -12,17 +12,6 @@ function HCDev() {
     return new HCDev(config);
   }
 
-
-  /*
-  this.GenerateConfig = (port, urls = [], localRoutes = []) => {
-    let config = {};
-    config.port = port;
-    config.urls = urls;
-    config.localRoutes = localRoutes;
-    return config;
-  }
-  */
-
   this.config = devOptions.config;
 
   this.AddUrl = (url) => {
@@ -43,27 +32,38 @@ function HCDev() {
       let remoteHostRegex = new RegExp(host, "g");
       let remoteHostWithProtocolRegex = new RegExp("https://" + host, "g");
       let atgHostRegex = new RegExp("atg_host: \"" + host + "\"");
-      let configHostRegex = new RegExp("config[\"host\"] = {\"env\":\"UAT\"}");
       finalBody = finalBody.replace(remoteHostWithProtocolRegex, "http://localhost:" + this.config.port);
-      finalBody = finalBody.replace(atgHostRegex, "atg_host: \"localhost:3000\"");
+      finalBody = finalBody.replace(atgHostRegex, "atg_host: \"localhost:" + this.config.port +"\"");
       finalBody = finalBody.replace(/atg_port: \"443\"/g, "atg_port: \"" + this.config.port + "\"");
       finalBody = finalBody.replace(/atg_port_secure: \"true\"/g, "atg_port_secure: \"false\"");
       finalBody = finalBody.replace(remoteHostRegex, "localhost:" + this.config.port);
-      finalBody = finalBody.replace(configHostRegex, "config[\"host\"] = {\"env\":\"DEV\"}");
+
+      if (this.config.customCleanResponseBody != undefined) {
+        finalBody = this.config.customCleanResponseBody(this.config, req, host, finalBody);
+      }
 
       // console.log( "Content cleaned... [" + finalBody.length + "]" );
     });
 
-    // Remove Bazaarvoice
-    finalBody = finalBody.replace(/bazaarvoice.com/g, "localhost:" + this.config.port);
-
     return finalBody;
+  }
+
+  this.CheckAdditionalMatchPatterns = (url) => {
+    let result = false;
+    this.config.matchPatterns.forEach((pattern) => {
+      if(url.match(pattern) && !result){
+        result = true;
+        break;
+      }
+    });
+
+    return result;
   }
 
   this.OnProxyRes = (proxyRes, req, res) => {
     if ((proxyRes.headers &&
         proxyRes.headers["content-type"] &&
-        proxyRes.headers["content-type"].match("text/html")) || req.url.match("channelConfig")) {
+        proxyRes.headers["content-type"].match("text/html")) || req.url.match("channelConfig") || this.CheckAdditionalMatchPatterns(req.url)) {
       // console.log("Modifying: " + req.url);
       const thisProxy = this;
       const write = res.write;
@@ -98,23 +98,25 @@ function HCDev() {
           res.write = write;
           let tmpLocation = res.getHeader("location");
           if (tmpLocation && tmpLocation.indexOf('zscalertwo.net') > -1) {
-            thisProxy.config.url.forEach((host) => {
-              let hostWithoutPeriods = host.replace(/\./g, "%2e");
+            thisProxy.config.urls.forEach((currentHost) => {
+              let hostWithoutPeriods = currentHost.host.replace(/\./g, "%2e");
               let escapedHost = new RegExp("https%3A%2F%2F" + hostWithoutPeriods, "g");
               tmpLocation = tmpLocation.replace(escapedHost, 'http%3A%2F%2Flocalhost:' + thisProxy.config.port);
               res.setHeader("location", tmpLocation);
+
+              // debugger;
+              let tmpCookie = res.getHeader("set-cookie");
+              if (tmpCookie) {
+                let finalCookie = [];
+                tmpCookie.forEach((cookie) => {
+                  let escapedHost = new RegExp(currentHost.host, "g");
+                  cookie = cookie.replace(escapedHost, 'localhost:' + thisProxy.config.port);
+                  finalCookie.push(cookie);
+                });
+                res.setHeader("set-cookie", finalCookie);
+              }
+
             });
-            // debugger;
-            let tmpCookie = res.getHeader("set-cookie");
-            if (tmpCookie) {
-              let finalCookie = [];
-              tmpCookie.forEach((cookie) => {
-                let escapedHost = new RegExp(".costcologoproducts.com", "g");
-                cookie = cookie.replace(escapedHost, 'localhost:' + thisProxy.config.port);
-                finalCookie.push(cookie);
-              });
-              res.setHeader("set-cookie", finalCookie);
-            }
           }
 
           res.setHeader("content-length", output.length);
@@ -163,17 +165,17 @@ function HCDev() {
     let response = {};
 
     // Target
-    response.target = this.config.urls[0];
+    response.target = this.config.urls[0].protocol + this.config.urls[0].host;
 
-    // Proxy Agent Config (Disabled for now due to it no longer being needed)
-    // config.agent = argv.proxy ? new PacProxyAgent(proxyServer) : null;
+    // Proxy Agent Config
+    response.agent = this.config.agent ? this.config.agent : null;
 
     // Secure connection
     response.secure = true;
 
     // Header configuration
     response.headers = {
-        host: this.config.urls[0]
+        host: this.config.urls[0].host
     };
 
     // Change Origin
