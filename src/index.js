@@ -151,9 +151,16 @@ function HCDev() {
 
   this.GetRoutes = () => {
     let result = {};
+
+    // localRoutes
     for (let iDirs = 0; iDirs < this.config.localRoutes.length; iDirs++) {
       const element = this.config.localRoutes[iDirs];
       result[element.route] = element.dir;
+    }
+
+    for (let iDirs = 0; iDirs < this.config.remoteRoutes.length; iDirs++) {
+      const element = this.config.remoteRoutes[iDirs];
+      result[element.route] = element.url;
     }
 
     return result;

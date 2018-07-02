@@ -35,6 +35,14 @@ module.exports = {
     }
   ],
 
+  // Remote Routes to override (optional)
+  remoteRoutes: [
+    {
+      route: '/localApp',
+      url: 'http://localhost:8080'
+    }
+  ],
+
   // Match Patterns for defining additional matches the request should be processed for.
   matchPatterns: [
     'example.txt',
@@ -69,6 +77,9 @@ Array defining the protocl & url of the website(s) to proxy
 
 #### localRoutes
 Array defining the routes to expose local build files which override files hosted on the front end site being proxied
+
+#### remoteRoutes
+Array defining the routes to expose remote URLs (can be locally hosted URLs) which override files hosted on the front end site being proxied
 
 #### matchPatterns
 Array defining the match patterns for which requests should be processed by the code

@@ -1,6 +1,6 @@
 {
   "name": "hc-dev",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Harland Clarke Local Development Proxy Configuration for testing websites with local front end builds",
   "main": "src/index.js",
   "scripts": {

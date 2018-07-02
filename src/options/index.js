@@ -5,6 +5,7 @@ const schema = createSchema(joi => joi.object({
   agent: joi.object(),
   urls: joi.array(),
   localRoutes: joi.array(),
+  remoteRoutes: joi.array(),
   matchPatterns: joi.array(),
   customCleanResponseBody: joi.func()
 }))
@@ -26,6 +27,9 @@ exports.defaults = () => ({
 
   // Local Routes to override
   localRoutes: [],
+
+  // Remote Routes to override
+  remoteRoutes: [],
 
   // Match Patterns for defining additional matches the request should be processed for.
   matchPatterns: [],
