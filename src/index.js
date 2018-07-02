@@ -18,7 +18,7 @@ function HCDev() {
     this.config.urls.push(url);
   }
 
-  this.AddLocalRoute = (route,dir) => {
+  this.AddLocalRoute = (route, dir) => {
     this.config.localRoutes.push({
       route: route,
       dir: dir
@@ -27,19 +27,19 @@ function HCDev() {
 
   this.CleanResponseBody = (req, body) => {
     let finalBody = body;
-    this.config.urls.forEach((host) => {
+    this.config.urls.forEach((currentHost) => {
       // console.log( "Cleaning content... [" + host + "," + finalBody.length + "]" );
-      let remoteHostRegex = new RegExp(host, "g");
-      let remoteHostWithProtocolRegex = new RegExp("https://" + host, "g");
-      let atgHostRegex = new RegExp("atg_host: \"" + host + "\"");
+      let remoteHostRegex = new RegExp(currentHost.host, "g");
+      let remoteHostWithProtocolRegex = new RegExp(currentHost.protocol + currentHost.host, "g");
+      let atgHostRegex = new RegExp("atg_host: \"" + currentHost.host + "\"");
       finalBody = finalBody.replace(remoteHostWithProtocolRegex, "http://localhost:" + this.config.port);
-      finalBody = finalBody.replace(atgHostRegex, "atg_host: \"localhost:" + this.config.port +"\"");
+      finalBody = finalBody.replace(atgHostRegex, "atg_host: \"localhost:" + this.config.port + "\"");
       finalBody = finalBody.replace(/atg_port: \"443\"/g, "atg_port: \"" + this.config.port + "\"");
       finalBody = finalBody.replace(/atg_port_secure: \"true\"/g, "atg_port_secure: \"false\"");
       finalBody = finalBody.replace(remoteHostRegex, "localhost:" + this.config.port);
 
       if (this.config.customCleanResponseBody != undefined) {
-        finalBody = this.config.customCleanResponseBody(this.config, req, host, finalBody);
+        finalBody = this.config.customCleanResponseBody(this.config, req, currentHost.protocol, currentHost.host, finalBody);
       }
 
       // console.log( "Content cleaned... [" + finalBody.length + "]" );
@@ -51,9 +51,8 @@ function HCDev() {
   this.CheckAdditionalMatchPatterns = (url) => {
     let result = false;
     this.config.matchPatterns.forEach((pattern) => {
-      if(url.match(pattern) && !result){
+      if (url.match(pattern) && !result) {
         result = true;
-        break;
       }
     });
 
@@ -175,7 +174,7 @@ function HCDev() {
 
     // Header configuration
     response.headers = {
-        host: this.config.urls[0].host
+      host: this.config.urls[0].host
     };
 
     // Change Origin

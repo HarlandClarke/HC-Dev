@@ -3,19 +3,28 @@ const path = require('path')
 const chalk = require("chalk");
 const readPkg = require('read-pkg')
 const defaultsDeep = require('lodash.defaultsdeep')
-const { warn, error,  ensureSlash, removeSlash  } = require('../shared-utils')
-const { defaults, validate } = require('../options')
+const {
+  warn,
+  error,
+  ensureSlash,
+  removeSlash
+} = require('../shared-utils')
+const {
+  defaults,
+  validate
+} = require('../options')
 
 module.exports = class DevOptions {
 
-  constructor(context, { pkg } = {}) {
+  constructor(context, {
+    pkg
+  } = {}) {
     this.context = context
     this.pkg = this.resolvePkg(pkg)
 
     // load user config
     const devOptions = this.loadDevOptions()
     this.config = defaultsDeep(devOptions, defaults())
-    warn(JSON.stringify(this.config));
   }
 
   resolvePkg(inlinePkg) {

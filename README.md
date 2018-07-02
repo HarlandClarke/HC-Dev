@@ -22,7 +22,9 @@ module.exports = {
 
   // URLs to serve up on localhost (optional)
   urls: [
-    'https://uat.SomeHCFrontEndSite.com'
+    {
+      protocol: 'https://',
+      host: 'uat.SomeHCFrontEndSite.com'
   ],
 
   // Local Routes to override (optional)
@@ -40,7 +42,7 @@ module.exports = {
   ],
 
   // Custom Clean Body Response Function (optional)
-  customCleanBodyResponse: (config, req, host, finalBody) => {
+  customCleanBodyResponse: (config, req, protocol, host, finalBody) => {
 
     // Modify js enviro param to be Dev
     let configHostRegex = new RegExp("config[\"host\"] = {\"env\":\"UAT\"}");
@@ -56,14 +58,23 @@ module.exports = {
 }
 ```
 
-#### Port
+#### port
 Defines the proxy port which should host the local dev server site
 
+#### agent
+Defines the proxy agent which should be used for all requests. Useful for situations where you are behind a corporate proxy
+
 #### urls
-Array defining the url of the website(s) to proxy
+Array defining the protocl & url of the website(s) to proxy
 
 #### localRoutes
 Array defining the routes to expose local build files which override files hosted on the front end site being proxied
+
+#### matchPatterns
+Array defining the match patterns for which requests should be processed by the code
+
+#### customCleanBodyResponse
+Function used to apply custom cleaning of the response before pushing back to the browser
 
 ### BrowerSync Configuration
 In order to use this utility, you must be using BrowserSync and use the GetBrowserSyncConfig command to generate an appropriate configuration for BrowserSync from the config file mentioned above. An example of how this can be done can be seen below, using the Vue-CLI config file to reference the incorporate the HC-Dev platform.
