@@ -5,6 +5,13 @@ const proxyMiddleware = require('http-proxy-middleware');
 const DevOptions = require('./DevOptions');
 const devOptions = new DevOptions(process.cwd());
 
+String.prototype.insert = function (index, string) {
+  if (index > 0)
+    return this.substring(0, index) + string + this.substring(index, this.length);
+  else
+    return string + this;
+};
+
 
 function HCDev() {
 
@@ -13,17 +20,6 @@ function HCDev() {
   }
 
   this.config = devOptions.config;
-
-  this.AddUrl = (url) => {
-    this.config.urls.push(url);
-  }
-
-  this.AddLocalRoute = (route, dir) => {
-    this.config.localRoutes.push({
-      route: route,
-      dir: dir
-    });
-  }
 
   this.CleanResponseBody = (req, body) => {
     let finalBody = body;
@@ -38,11 +34,38 @@ function HCDev() {
       finalBody = finalBody.replace(/atg_port_secure: \"true\"/g, "atg_port_secure: \"false\"");
       finalBody = finalBody.replace(remoteHostRegex, "localhost:" + this.config.port);
 
+      // Custom Scripts To Inject
+      finalBody = this.injectCustomScripts(req, currentHost.protocol, currentHost.host, finalBody);
+
+      // Custom Clean Response Body
       if (this.config.customCleanResponseBody != undefined) {
         finalBody = this.config.customCleanResponseBody(this.config, req, currentHost.protocol, currentHost.host, finalBody);
       }
 
       // console.log( "Content cleaned... [" + finalBody.length + "]" );
+    });
+
+    return finalBody;
+  }
+
+  this.injectCustomScripts = (req, protocol, host, finalBody) => {
+
+    // Loop thru custom scripts
+    this.config.scriptsToInject.forEach((script) => {
+      if ((script.pattern != undefined && script.pattern.test(req.url)) || (script.matchRoutine != undefined && script.matchRoutine(this.config, req, protocol, host, finalBody))) {
+
+        // Perform gallery page injection
+        let insertionLocation = finalBody.lastIndexOf('</body>');
+        let injectionHTML = '<script type="text/javascript" src="' + script.path + '"' + (script.loadAsync ? ' async' : '') + '></script>';
+
+        // Insert before closing head if specified
+        if (script.loadInHead) {
+          insertionLocation = finalBody.lastIndexOf('</head>') > -1 ? finalBody.lastIndexOf('</head>') : insertionLocation;
+        }
+
+        // Perform insertion
+        finalBody = finalBody.insert(insertionLocation, injectionHTML);
+      }
     });
 
     return finalBody;
@@ -149,7 +172,7 @@ function HCDev() {
     }
   }
 
-  this.GetRoutes = () => {
+  this.GetServerRoutes = () => {
     let result = {};
 
     // localRoutes
@@ -158,10 +181,33 @@ function HCDev() {
       result[element.route] = element.dir;
     }
 
+    // Routes for scripts to inject
+    this.config.scriptsToInject.forEach((script) => {
+      if (script.customRoute != undefined) {
+        let keyName = Object.keys(script.customRoute);
+        result[keyName] = script.customRoute[keyName];
+      }
+    });
+
+    return result;
+  }
+
+  this.GetMiddlewareRoutes = () => {
+    let result = {};
+
+    // remoteRoutes
     for (let iDirs = 0; iDirs < this.config.remoteRoutes.length; iDirs++) {
       const element = this.config.remoteRoutes[iDirs];
       result[element.route] = element.url;
     }
+
+    // Routes for scripts to inject
+    this.config.scriptsToInject.forEach((script) => {
+      if (script.customRoute != undefined) {
+        let keyName = Object.keys(script.customRoute);
+        result[keyName] = script.customRoute[keyName];
+      }
+    });
 
     return result;
   }
@@ -190,6 +236,9 @@ function HCDev() {
     // Auto Rewrite
     response.autoRewrite = true;
 
+    // Remote Routes
+    response.router = this.GetMiddlewareRoutes();
+
     // Proxy processing object
     response.onProxyRes = this.OnProxyRes;
 
@@ -209,7 +258,7 @@ function HCDev() {
           proxyMiddleware(this.GetHttpProxyMiddlewareConfig()),
           cors({})
         ],
-        routes: this.GetRoutes()
+        routes: this.GetServerRoutes()
       }
     };
   }

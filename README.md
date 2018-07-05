@@ -11,7 +11,7 @@ Configure your local project by placing hcdev.config.js in the root of the proje
 The file format should be something like the following:
 
 `hcdev.config.js`
-``` js
+```js
 module.exports = {
 
   // Proxy Port
@@ -43,11 +43,40 @@ module.exports = {
     }
   ],
 
-  // Match Patterns for defining additional matches the request should be processed for.
+  // Match Patterns for defining additional matches the request should be processed for. (optional)
   matchPatterns: [
     'example.txt',
     '/someDirectory/example.html'
   ],
+
+  // Match Routines for defining additional matches the request should be processed for. If all requests, just return true. (optional)
+  matchRoutine: (config, req, protocol, host) => {
+
+  },
+
+  // Scripts To Inject
+  scriptsToInject: [{
+    // The path of the script to include
+    path: '/store/scripts/gallery.js',
+    // Indicates if the script should be loaded async or not
+    loadAsync: true,
+    // Indicates if the script should be added before the closing head tag instead of the closing body tag
+    loadInHead: false,
+    // URL match pattern for which pages the script should be injected
+    pattern: new RegEx('.jsp','g'),
+    // The custom route which needs to be overriden. Similar to the localRoute above, but specific to this script. (optional)
+    customRoute: {
+      '/store/scripts/gallery.js': '/localApp/app.js'
+    },
+    // The routine used for matching which pages this script should be included for. If all requests, just return true.
+    matchRoutine: (config, req, protocol, host, finalBody) => {
+      // Match only jsp pages
+      if (req.url.indexOf('dynoGallery=true') > -1){
+        return req.url.includes('.jsp');
+      }
+      return false;
+    }
+  }],
 
   // Custom Clean Body Response Function (optional)
   customCleanBodyResponse: (config, req, protocol, host, finalBody) => {
