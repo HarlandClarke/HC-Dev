@@ -1,6 +1,6 @@
 {
   "name": "hc-dev",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Harland Clarke Local Development Proxy Configuration for testing websites with local front end builds",
   "main": "src/index.js",
   "scripts": {
@@ -10,8 +10,8 @@
     "type": "git",
     "url": "git+https://github.com/HarlandClarke/HC-Dev.git"
   },
-  "author": "Peter N. Lewis",
-  "license": "ISC",
+  "author": "Harland Clarke",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/HarlandClarke/HC-Dev/issues"
   },
