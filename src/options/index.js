@@ -34,7 +34,11 @@ const schema = createSchema(joi => {
       remoteRoutes: joi.array().items(remoteRoute),
       matchPatterns: joi.array().items(joi.string()),
       scriptsToInject: joi.array().items(scriptToInject),
-      customCleanResponseBody: joi.func().arity(5)
+      customCleanResponseBody: joi.func().arity(5),
+      validateCerts: joi.boolean(),
+      changeOrigin: joi.boolean(),
+      autoRewrite: joi.boolean(),
+      corsOptions: joi.object()
     })
   }
 )
@@ -67,6 +71,18 @@ exports.defaults = () => ({
   scriptsToInject: [],
 
   // Function for defining what
-  customCleanResponseBody: null
+  customCleanResponseBody: null,
+
+  // Validate certificates
+  validateCerts: null,
+
+  // changeOrigin
+  changeOrigin: null,
+
+  // autoRewrite
+  autoRewrite: null,
+
+  // cors options
+  corsOptions: null
 
 })

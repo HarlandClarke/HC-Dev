@@ -223,7 +223,7 @@ function HCDev() {
     response.agent = this.config.agent ? this.config.agent : null;
 
     // Secure connection
-    response.secure = true;
+    response.secure = this.config.validateCerts ? this.config.validateCerts : true;
 
     // Header configuration
     response.headers = {
@@ -231,10 +231,10 @@ function HCDev() {
     };
 
     // Change Origin
-    response.changeOrigin = true;
+    response.changeOrigin = this.config.changeOrigin ? this.config.changeOrigin : true;
 
     // Auto Rewrite
-    response.autoRewrite = true;
+    response.autoRewrite = this.config.autoRewrite ? this.config.autoRewrite : true;
 
     // Remote Routes
     response.router = this.GetMiddlewareRoutes();
@@ -256,7 +256,7 @@ function HCDev() {
         baseDir: './',
         middleware: [
           proxyMiddleware(this.GetHttpProxyMiddlewareConfig()),
-          cors({})
+          cors(this.config.corsOptions ? this.config.corsOptions : {})
         ],
         routes: this.GetServerRoutes()
       }
