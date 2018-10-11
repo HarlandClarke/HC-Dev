@@ -223,7 +223,7 @@ function HCDev() {
     response.agent = this.config.agent ? this.config.agent : null;
 
     // Secure connection
-    response.secure = this.config.validateCerts ? this.config.validateCerts : true;
+    response.secure = this.config.validateCerts;
 
     // Header configuration
     response.headers = {
@@ -231,10 +231,10 @@ function HCDev() {
     };
 
     // Change Origin
-    response.changeOrigin = this.config.changeOrigin ? this.config.changeOrigin : true;
+    response.changeOrigin = this.config.changeOrigin;
 
     // Auto Rewrite
-    response.autoRewrite = this.config.autoRewrite ? this.config.autoRewrite : true;
+    response.autoRewrite = this.config.autoRewrite;
 
     // Remote Routes
     response.router = this.GetMiddlewareRoutes();

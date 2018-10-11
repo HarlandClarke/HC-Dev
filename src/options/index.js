@@ -74,13 +74,13 @@ exports.defaults = () => ({
   customCleanResponseBody: null,
 
   // Validate certificates
-  validateCerts: null,
+  validateCerts: true,
 
   // changeOrigin
-  changeOrigin: null,
+  changeOrigin: true,
 
   // autoRewrite
-  autoRewrite: null,
+  autoRewrite: true,
 
   // cors options
   corsOptions: null

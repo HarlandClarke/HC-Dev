@@ -17,6 +17,15 @@ module.exports = {
   // Proxy Port
   port: 3000,
 
+  // Validate Certificates
+  validateCerts: true,
+
+  // Change Origin
+  changeOrigin: true,
+
+  // Autorewrite Url
+  autoRewrite: true,
+
   // Proxy agent to use (optional)
   agent: new ProxyAgent('pac+http://someproxyserver.hosted.com/proxy.PAC'),
 
@@ -97,6 +106,15 @@ module.exports = {
 
 #### port
 Defines the proxy port which should host the local dev server site
+
+#### validateCerts
+Indicates if the certificate chain should be validated or not
+
+#### changeOrigin
+Changes the origin of the host header to the target URL
+
+#### autoRewrite
+Rewrites the location host/port on (301/302/307/308) redirects based on requested host/port.
 
 #### agent
 Defines the proxy agent which should be used for all requests. Useful for situations where you are behind a corporate proxy
