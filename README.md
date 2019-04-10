@@ -156,3 +156,10 @@ module.exports = {
 }
 
 ```
+
+## Development of HC-Dev
+To debug in a Vue-Cli Project:
+
+``` bash
+npx --node-arg=--inspect vue-cli-service serve
+```
