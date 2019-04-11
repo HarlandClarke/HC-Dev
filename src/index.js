@@ -83,6 +83,12 @@ function HCDev() {
   }
 
   this.OnProxyRes = (proxyRes, req, res) => {
+
+    // Modify the redirect to http if it is currently https
+    if (proxyRes.headers["location"] && proxyRes.headers["location"].match("https")) {
+      proxyRes.headers["location"] = proxyRes.headers["location"].replace("https:", "http:");
+    }
+
     if ((proxyRes.headers &&
         proxyRes.headers["content-type"] &&
         proxyRes.headers["content-type"].match("text/html")) || req.url.match("channelConfig") || this.CheckAdditionalMatchPatterns(req.url)) {
