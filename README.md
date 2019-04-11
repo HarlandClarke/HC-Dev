@@ -17,6 +17,9 @@ module.exports = {
   // Proxy Port
   port: 3000,
 
+  // Proxy UI Port
+  uiPort: 3001,
+
   // Validate Certificates
   validateCerts: true,
 
@@ -34,7 +37,34 @@ module.exports = {
     {
       protocol: 'https://',
       host: 'uat.SomeHCFrontEndSite.com'
+    }
   ],
+
+  sites: [
+    {
+      port: 3010,
+      uiPort: 3011,
+      urls: [
+        {
+          protocol: 'https://',
+          host: 'uat.SomeSecondaryHCFrontEndSite.com'
+        }
+      ]
+    },
+    {
+      port: 3012,
+      uiPort: 3013,
+      urls: [
+        {
+          protocol: 'https://',
+          host: 'uat.SomeOtherSecondaryHCFrontEndSite.com'
+        }
+      ]
+    }
+  ],
+
+  // Forces location redirects to use http vs https
+  forceHttpLocationRedirects: true,
 
   // Local Routes to override (optional)
   localRoutes: [
@@ -107,6 +137,9 @@ module.exports = {
 #### port
 Defines the proxy port which should host the local dev server site
 
+#### uiPort (optional)
+Defines the proxy port which should host the proxy UI interface. If not provided, is one greater than the port.
+
 #### validateCerts
 Indicates if the certificate chain should be validated or not
 
@@ -121,6 +154,12 @@ Defines the proxy agent which should be used for all requests. Useful for situat
 
 #### urls
 Array defining the protocl & url of the website(s) to proxy
+
+#### sites
+Array defining the secondary sites to proxy as well to handle redirects to/from the primary dev site
+
+#### forceHttpLocationRedirects
+Forces location based redirects to use http vs https
 
 #### localRoutes
 Array defining the routes to expose local build files which override files hosted on the front end site being proxied
@@ -155,4 +194,11 @@ module.exports = {
   }
 }
 
+```
+
+## Development of HC-Dev
+To debug in a Vue-Cli Project:
+
+``` bash
+npx --node-arg=--inspect vue-cli-service serve
 ```
