@@ -1,9 +1,9 @@
 const browserSync = require('browser-sync')
 const getCssOnlyEmittedAssetsNames = require('./lib/getCssOnlyEmittedAssetsNames')
 
-const DevOptions = require('./DevOptions');
+const DevOptions = require('./DevOptions')
 
-const HCDev = require('./HCDev');
+const HCDev = require('./HCDev')
 
 const defaultPluginOptions = {
 
@@ -17,40 +17,20 @@ const defaultPluginOptions = {
 class HCDevPlugin {
   constructor(browserSyncOptions, pluginOptions) {
 
-    const devOptions = new DevOptions(process.cwd());
+    const devOptions = new DevOptions(process.cwd())
 
     this.options = Object.assign({}, defaultPluginOptions, devOptions.config, pluginOptions)
 
-    if (!this.options.multiProxyConfig) {
-      console.log('Creating multiProxyConfig as it was missing')
-      this.options.multiProxyConfig = {
-        devSite: undefined,
-        sites: []
-      }
-    }
-    if (!this.options.multiProxyConfig.devSite) {
-      console.log('Creating multiProxyConfig.devSite as it was missing')
-      this.options.multiProxyConfig.devSite = {
-        port: this.options.port,
-        uiPort: this.options.port + 1,
-        urls: this.options.urls.slice(0)
-      }
+    // Set the default for the ui port
+    if (!this.options.uiPort) {
+      this.options.uiPort = this.options.port + 1
     }
 
-    for (let iSite = 0; iSite < this.options.multiProxyConfig.sites.length; iSite++) {
-      const site = this.options.multiProxyConfig.sites[iSite];
+    for (let iSite = 0; iSite < this.options.sites.length; iSite++) {
+      const site = this.options.sites[iSite]
       if (!site.uiPort) {
-        site.uiPort = site.port + 1;
+        site.uiPort = site.port + 1
       }
-    }
-
-    // Cleanup data
-    if (this.options.port) {
-      delete this.options.port;
-    }
-
-    if (this.options.urls) {
-      delete this.options.urls;
     }
 
     // Build custom browserSyncConfig
@@ -66,9 +46,13 @@ class HCDevPlugin {
     this.isBrowserSyncRunning = false
 
     // Configure Proxies for multiProxyConfig
-    this.options.multiProxyConfig.sites.forEach((site) => {
-      site.bs = browserSync.create("siteProxy-" + site.port);
-    });
+    this.options.sites.forEach((site) => {
+      site.bs = browserSync.create("siteProxy-" + site.port)
+    })
+  }
+
+  GetBrowserSyncConfig() {
+    return this.hcDev.GetBrowserSyncConfig()
   }
 
   apply(compiler) {
@@ -88,9 +72,9 @@ class HCDevPlugin {
       if (!this.isBrowserSyncRunning) {
         this.browserSync.init(this.browserSyncOptions, this.options.callback)
 
-        this.options.multiProxyConfig.sites.forEach((site) => {
+        this.options.sites.forEach((site) => {
 
-          const config = this.hcDev.GetMultispotSiteBrowserSyncConfig(site)
+          const config = this.hcDev.GetMultiSiteBrowserSyncConfig(site)
           site.bs.init(config)
 
         })

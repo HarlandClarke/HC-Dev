@@ -19,8 +19,8 @@ function HCDev(tmpConfig) {
 
   this.CleanResponseBody = (req, body) => {
     let finalBody = body;
-    this.config.multiProxyConfig.devSite.urls.forEach((currentUrl) => {
-      finalBody = this.CleanResponseBodyWithHost(req, body, currentUrl, "localhost", this.config.multiProxyConfig.devSite.port);
+    this.config.urls.forEach((currentUrl) => {
+      finalBody = this.CleanResponseBodyWithHost(req, body, currentUrl, "localhost", this.config.port);
     });
 
     return finalBody;
@@ -90,9 +90,9 @@ function HCDev(tmpConfig) {
 
     /*
     // Determine current site
-    let currentSite = (this.config.multiProxyConfig.devSite.port === req.socket.localPort) ? this.config.multiProxyConfig.devSite : null
+    let currentSite = (this.config.port === req.socket.localPort) ? this.config.urls : null
     if (!currentSite) {
-      for (let eachSite in this.config.multiProxyConfig.sites) {
+      for (let eachSite in this.config.sites) {
         if (eachSite.port === req.socket.localPort) {
           currentSite = eachSite;
           break;
@@ -115,9 +115,14 @@ function HCDev(tmpConfig) {
   }
 
   this.OnProxyRes = (proxyRes, req, res) => {
+
+    if (this.config.forceHttpLocationRedirects && proxyRes.headers["location"] && proxyRes.headers["location"].match("https:")) {
+      proxyRes.headers["location"] = proxyRes.headers["location"].replace("https:", "http:");
+    }
+
     if ((proxyRes.headers &&
-        proxyRes.headers["content-type"] &&
-        (proxyRes.headers["content-type"].match("text/html") || proxyRes.statusCode != 200 || proxyRes.headers["content-type"].match("application/javascript"))) || req.url.match("channelConfig") || this.CheckAdditionalMatchPatterns(req.url)) {
+      proxyRes.headers["content-type"] &&
+      proxyRes.headers["content-type"].match("text/html")) || req.url.match("channelConfig") || this.CheckAdditionalMatchPatterns(req.url)) {
       // console.log("Modifying: " + req.url);
       const thisProxy = this;
       const write = res.write;
@@ -127,9 +132,9 @@ function HCDev(tmpConfig) {
       let body;
       let buffer = new Buffer("");
       let isDevSite = true;
-      let currentSite = (this.config.multiProxyConfig.devSite.port === req.socket.localPort) ? this.config.multiProxyConfig.devSite : null
+      let currentSite = (this.config.port === req.socket.localPort) ? this.config.urls : null
       if (!currentSite) {
-        for (let eachSite in this.config.multiProxyConfig.sites) {
+        for (let eachSite in this.config.sites) {
           if (eachSite.port === req.socket.localPort) {
             currentSite = eachSite;
             isDevSite = false;
@@ -139,7 +144,7 @@ function HCDev(tmpConfig) {
       }
 
       // Defer write and writeHead
-      res.write = () => {};
+      res.write = () => { };
       res.writeHead = (...args) => {
         writeHeadArgs = args;
       };
@@ -164,12 +169,12 @@ function HCDev(tmpConfig) {
             output = thisProxy.CleanResponseBody(req, output); // some function to manipulate body
           } else {
 
-            thisProxy.config.multiProxyConfig.devSite.urls.forEach((url) => {
-              output = thisProxy.CleanResponseBodyWithHost(req, output, url, "localhost", thisProxy.config.multiProxyConfig.devSite.port);
+            thisProxy.config.urls.forEach((url) => {
+              output = thisProxy.CleanResponseBodyWithHost(req, output, url, "localhost", thisProxy.config.port);
             });
 
-            thisProxy.config.multiProxyConfig.sites.forEach((eachSite) => {
-              if (eachSite != currentSite) {
+            thisProxy.config.sites.forEach((eachSite) => {
+              if (eachSite.urls != currentSite) {
                 eachSite.urls.forEach((url) => {
                   output = thisProxy.CleanResponseBodyWithHost(req, output, url, "localhost", eachSite.port);
                 });
@@ -208,15 +213,15 @@ function HCDev(tmpConfig) {
             }
 
             if (!isDevSite) {
-              if (req.socket.localPort !== thisProxy.config.multiProxyConfig.devSite.port) {
-                thisProxy.config.multiProxyConfig.devSite.urls.forEach((url) => {
+              if (req.socket.localPort !== thisProxy.config.port) {
+                thisProxy.config.urls.forEach((url) => {
                   if (tmpLocation.indexOf(url.host) > -1) {
-                    res.setHeader("location", tmpLocation.replace(url.host, "localhost:" + thisProxy.config.multiProxyConfig.devSite.port).replace("https:", "http:"));
+                    res.setHeader("location", tmpLocation.replace(url.host, "localhost:" + thisProxy.config.port).replace("https:", "http:"));
                   }
                 });
               }
             }
-            thisProxy.config.multiProxyConfig.sites.forEach((site) => {
+            thisProxy.config.sites.forEach((site) => {
               site.urls.forEach((url) => {
                 if (tmpLocation.indexOf(url.host) > -1) {
                   res.setHeader("location", tmpLocation.replace(url.host, "localhost:" + site.port).replace("https:", "http:"));
@@ -299,7 +304,12 @@ function HCDev(tmpConfig) {
 
     let response = {};
 
-    const siteToHost = site ? site : this.config.multiProxyConfig.devSite;
+    let siteToHost = site ? site : null;
+    if (!siteToHost) {
+      siteToHost = {
+        urls: this.config.urls,
+      }
+    }
 
     // Target
     response.target = siteToHost.urls[0].protocol + siteToHost.urls[0].host;
@@ -338,9 +348,9 @@ function HCDev(tmpConfig) {
   this.GetBrowserSyncConfig = () => {
     return {
       open: true,
-      port: this.config.multiProxyConfig.devSite.port,
+      port: this.config.port,
       ui: {
-        port: this.config.multiProxyConfig.devSite.uiPort
+        port: this.config.uiPort
       },
       https: false,
       host: 'localhost',
@@ -360,7 +370,7 @@ function HCDev(tmpConfig) {
     };
   }
 
-  this.GetMultispotSiteBrowserSyncConfig = (site) => {
+  this.GetMultiSiteBrowserSyncConfig = (site) => {
     return {
       open: false,
       port: site.port,

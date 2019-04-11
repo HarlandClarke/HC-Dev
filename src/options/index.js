@@ -10,17 +10,10 @@ const schema = createSchema(joi => {
     host: joi.string().required()
   })
 
-  const multiProxyConfig = joi.object().keys({
-    devSite: joi.object().keys({
-      port: joi.number(),
-      uiPort: joi.number(),
-      urls: joi.array().items(url)
-    }),
-    sites: joi.array().items(joi.object().keys({
-      port: joi.number(),
-      uiPort: joi.number(),
-      urls: joi.array().items(url)
-    }))
+  const site = joi.object().keys({
+    port: joi.number(),
+    uiPort: joi.number(),
+    urls: joi.array().items(url)
   })
 
   const localRoute = joi.object().keys({
@@ -44,10 +37,11 @@ const schema = createSchema(joi => {
 
   return joi.object({
     port: joi.number().required(),
+    uiPort: joi.number(),
     agent: joi.any(),
     https: joi.boolean(),
     urls: joi.array().items(url),
-    multiProxyConfig: multiProxyConfig,
+    sites: joi.array().items(site),
     localRoutes: joi.array().items(localRoute),
     remoteRoutes: joi.array().items(remoteRoute),
     matchPatterns: joi.array().items(joi.string()),
@@ -56,7 +50,8 @@ const schema = createSchema(joi => {
     validateCerts: joi.boolean(),
     changeOrigin: joi.boolean(),
     autoRewrite: joi.boolean(),
-    corsOptions: joi.any()
+    corsOptions: joi.any(),
+    forceHttpLocationRedirects: joi.boolean(),
   })
 })
 
@@ -69,6 +64,9 @@ exports.defaults = () => ({
   // Proxy host port
   port: 3000,
 
+  // Proxy host ui port
+  uiPort: 3001,
+
   // Proxy Agent
   agent: undefined,
 
@@ -78,7 +76,7 @@ exports.defaults = () => ({
   // URLs to proxy
   urls: [],
 
-  multiProxyConfig: undefined,
+  sites: [],
 
   // Local Routes to override
   localRoutes: [],
@@ -105,6 +103,9 @@ exports.defaults = () => ({
   autoRewrite: true,
 
   // cors options
-  corsOptions: undefined
+  corsOptions: undefined,
+
+  // forceHttpLocationRedirects
+  forceHttpLocationRedirects: true
 
 })
