@@ -1,5 +1,4 @@
 const zlib = require("zlib");
-const cors = require('connect-cors');
 const proxyMiddleware = require('http-proxy-middleware');
 
 String.prototype.insert = function (index, string) {
@@ -26,7 +25,7 @@ function HCDev(tmpConfig) {
     return finalBody;
   }
 
-  this.CleanResponseBodyWithHost = (req, body, currentUrl, newHost, newPort) => {
+  this.CleanResponseBodyWithHost = (req, body, currentUrl, newHost, newPort, skipInjectionAndCustomCleanup = false) => {
     let finalBody = body;
 
     // console.log( "Cleaning content... [" + host + "," + finalBody.length + "]" );
@@ -39,12 +38,14 @@ function HCDev(tmpConfig) {
     finalBody = finalBody.replace(/atg_port_secure: \"true\"/g, "atg_port_secure: \"false\"");
     finalBody = finalBody.replace(remoteHostRegex, newHost + ":" + newPort);
 
-    // Custom Scripts To Inject
-    finalBody = this.injectCustomScripts(req, currentUrl.protocol, currentUrl.host, finalBody);
+    if (!skipInjectionAndCustomCleanup) {
+      // Custom Scripts To Inject
+      finalBody = this.injectCustomScripts(req, currentUrl.protocol, currentUrl.host, finalBody);
 
-    // Custom Clean Response Body
-    if (this.config.customCleanResponseBody != undefined) {
-      finalBody = this.config.customCleanResponseBody(this.config, req, currentUrl.protocol, currentUrl.host, finalBody, newHost, newPort);
+      // Custom Clean Response Body
+      if (this.config.customCleanResponseBody != undefined) {
+        finalBody = this.config.customCleanResponseBody(this.config, req, currentUrl.protocol, currentUrl.host, finalBody, newHost, newPort);
+      }
     }
 
     // console.log( "Content cleaned... [" + finalBody.length + "]" );
@@ -172,16 +173,15 @@ function HCDev(tmpConfig) {
             thisProxy.config.urls.forEach((url) => {
               output = thisProxy.CleanResponseBodyWithHost(req, output, url, "localhost", thisProxy.config.port);
             });
-
-            thisProxy.config.sites.forEach((eachSite) => {
-              if (eachSite.urls != currentSite) {
-                eachSite.urls.forEach((url) => {
-                  output = thisProxy.CleanResponseBodyWithHost(req, output, url, "localhost", eachSite.port);
-                });
-              }
-            });
-
           }
+
+          thisProxy.config.sites.forEach((eachSite) => {
+            if (eachSite.urls != currentSite) {
+              eachSite.urls.forEach((url) => {
+                output = thisProxy.CleanResponseBodyWithHost(req, output, url, "localhost", eachSite.port, true);
+              });
+            }
+          });
 
           res.write = write;
           let tmpLocation = res.getHeader("location");
@@ -353,6 +353,7 @@ function HCDev(tmpConfig) {
         port: this.config.uiPort
       },
       https: false,
+      cors: true,
       host: 'localhost',
       serveStatic: this.config.localRoutes,
       serveStaticOptions: {
@@ -362,8 +363,7 @@ function HCDev(tmpConfig) {
         secure: false,
         baseDir: './',
         middleware: [
-          proxyMiddleware(this.GetHttpProxyMiddlewareConfig()),
-          cors(this.config.corsOptions ? this.config.corsOptions : {})
+          proxyMiddleware(this.GetHttpProxyMiddlewareConfig())
         ],
         routes: this.GetServerRoutes()
       }
@@ -378,6 +378,7 @@ function HCDev(tmpConfig) {
         port: site.uiPort
       },
       https: false,
+      cors: true,
       host: 'localhost',
       serveStatic: this.config.localRoutes,
       serveStaticOptions: {
@@ -385,7 +386,7 @@ function HCDev(tmpConfig) {
       },
       server: {
         middleware: [
-          proxyMiddleware(this.GetHttpProxyMiddlewareConfig(site)),
+          proxyMiddleware(this.GetHttpProxyMiddlewareConfig(site))
         ]
       }
     };
