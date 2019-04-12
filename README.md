@@ -4,8 +4,56 @@ Harland Clarke Development Proxy for use in local dev testing of front end websi
 
 ## How To Use
 
-1. Configuration is accomplished by using the hcdev.config.js config file
-2. Implementaiton is performed by using the BrowserSync configuration export
+1. Modern Implementation (Webpack Plugin)
+2. Legacy Implementation (BrowserSync Configuration Factory)
+3. Configuration is accomplished by using the hcdev.config.js config file
+
+### Webpack Plugin
+
+In order to use this utility, you must be adding the plugin to your Webpack configuration. If using Vue-CLI, this is done within vue.config.js.
+
+``` js
+
+const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
+const HCDevPlugin = require('hc-dev');
+
+module.exports = {
+  lintOnSave: false,
+  configureWebpack: {
+    output: {
+      path: __dirname + "/dist"
+    },
+    plugins: [
+      new HCDevPlugin()
+    ]
+  }
+}
+
+```
+
+### BrowerSync Configuration (Legacy Implementation)
+
+In order to use this utility, you must be using BrowserSync and use the GetBrowserSyncConfig command to generate an appropriate configuration for BrowserSync from the config file mentioned above. An example of how this can be done can be seen below, using the Vue-CLI config file to reference the incorporate the HC-Dev platform.
+
+``` js
+
+const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
+const HCDev = require('hc-dev');
+const hcDev = new HCDev();
+
+module.exports = {
+  lintOnSave: false,
+  configureWebpack: {
+    output: {
+      path: __dirname + "/dist"
+    },
+    plugins: [
+      new BrowserSyncPlugin(hcDev.GetBrowserSyncConfig())
+    ]
+  }
+}
+
+```
 
 ### Configuration File (hcdev.config.js)
 
@@ -191,30 +239,6 @@ Array defining the match patterns for which requests should be processed by the 
 #### customCleanBodyResponse
 
 Function used to apply custom cleaning of the response before pushing back to the browser
-
-### BrowerSync Configuration
-
-In order to use this utility, you must be using BrowserSync and use the GetBrowserSyncConfig command to generate an appropriate configuration for BrowserSync from the config file mentioned above. An example of how this can be done can be seen below, using the Vue-CLI config file to reference the incorporate the HC-Dev platform.
-
-``` js
-
-const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
-const HCDev = require('hc-dev');
-const hcDev = new HCDev();
-
-module.exports = {
-  lintOnSave: false,
-  configureWebpack: {
-    output: {
-      path: __dirname + "/dist"
-    },
-    plugins: [
-      new BrowserSyncPlugin(hcDev.GetBrowserSyncConfig())
-    ]
-  }
-}
-
-```
 
 ## Development of HC-Dev
 
