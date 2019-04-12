@@ -2,6 +2,12 @@
 
 Harland Clarke Development Proxy for use in local dev testing of front end websites
 
+## Install
+
+```console
+$ npm install --save-dev HarlandClarke/hc-dev
+```
+
 ## How To Use
 
 1. Modern Implementation (Webpack Plugin)
