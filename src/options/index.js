@@ -46,7 +46,7 @@ const schema = createSchema(joi => {
     remoteRoutes: joi.array().items(remoteRoute),
     matchPatterns: joi.array().items(joi.string()),
     scriptsToInject: joi.array().items(scriptToInject),
-    customCleanResponseBody: joi.func().arity(7),
+    customCleanResponseBody: joi.func().minArity(5).maxArity(7),
     validateCerts: joi.boolean(),
     changeOrigin: joi.boolean(),
     autoRewrite: joi.boolean(),

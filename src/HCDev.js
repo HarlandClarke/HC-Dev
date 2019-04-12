@@ -44,7 +44,7 @@ function HCDev(tmpConfig) {
 
     // Custom Clean Response Body
     if (this.config.customCleanResponseBody != undefined) {
-      finalBody = this.config.customCleanResponseBody(this.config, req, currentUrl.protocol, currentUrl.host, newHost, newPort, finalBody);
+      finalBody = this.config.customCleanResponseBody(this.config, req, currentUrl.protocol, currentUrl.host, finalBody, newHost, newPort);
     }
 
     // console.log( "Content cleaned... [" + finalBody.length + "]" );
