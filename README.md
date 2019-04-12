@@ -14,7 +14,6 @@ In order to use this utility, you must be adding the plugin to your Webpack conf
 
 ``` js
 
-const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
 const HCDevPlugin = require('hc-dev');
 
 module.exports = {
