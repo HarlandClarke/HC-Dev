@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const browserSync = require('browser-sync')
 const getCssOnlyEmittedAssetsNames = require('./lib/getCssOnlyEmittedAssetsNames')
 
@@ -49,6 +50,8 @@ class HCDevPlugin {
     this.options.sites.forEach((site) => {
       site.bs = browserSync.create("siteProxy-" + site.port)
     })
+
+    console.log(chalk.black.bgGreen('HC-Dev Plugin') + ' successfully initialized!');
   }
 
   GetBrowserSyncConfig() {

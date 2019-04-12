@@ -17,19 +17,19 @@ exports.log = (msg = '', tag = null) => {
 }
 
 exports.info = (msg, tag = null) => {
-  console.log(format(chalk.bgBlue.black(' INFO ') + (tag ? chalkTag(tag) : ''), msg))
+  console.log(format(chalk.black.bgGreen('HC-Dev Plugin') + '\n' + chalk.bgBlue.black(' INFO ') + (tag ? chalkTag(tag) : ''), msg))
 }
 
 exports.done = (msg, tag = null) => {
-  console.log(format(chalk.bgGreen.black(' DONE ') + (tag ? chalkTag(tag) : ''), msg))
+  console.log(format(chalk.black.bgGreen('HC-Dev Plugin') + '\n' + chalk.bgGreen.black(' DONE ') + (tag ? chalkTag(tag) : ''), msg))
 }
 
 exports.warn = (msg, tag = null) => {
-  console.warn(format(chalk.bgYellow.black(' WARN ') + (tag ? chalkTag(tag) : ''), chalk.yellow(msg)))
+  console.warn(format(chalk.black.bgGreen('HC-Dev Plugin') + '\n' + chalk.bgYellow.black(' WARN ') + (tag ? chalkTag(tag) : ''), chalk.yellow(msg)))
 }
 
 exports.error = (msg, tag = null) => {
-  console.error(format(chalk.bgRed(' ERROR ') + (tag ? chalkTag(tag) : ''), chalk.red(msg)))
+  console.error(format(chalk.black.bgGreen('HC-Dev Plugin') + '\n' + chalk.bgRed(' ERROR ') + (tag ? chalkTag(tag) : ''), chalk.red(msg)))
   if (msg instanceof Error) {
     console.error(msg.stack)
   }
