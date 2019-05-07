@@ -124,6 +124,12 @@ module.exports = {
   // Forces location redirects to use http vs https
   forceHttpLocationRedirects: true,
 
+  // Include local websocket redirect for HMR
+  includeLocalWebsocketProxy: true,
+
+  // Default local websocket port for HMR
+  localWebsocketPort: 8080,
+
   // Local Routes to override (optional)
   localRoutes: [
     {
@@ -157,6 +163,29 @@ module.exports = {
     path: '/store/scripts/gallery.js',
     // Indicates if the script should be loaded async or not
     loadAsync: true,
+    // Indicates if the script should be added before the closing head tag instead of the closing body tag
+    loadInHead: false,
+    // URL match pattern for which pages the script should be injected
+    pattern: new RegEx('.jsp','g'),
+    // The custom route which needs to be overriden. Similar to the localRoute above, but specific to this script. (optional)
+    customRoute: {
+      '/store/scripts/gallery.js': '/localApp/app.js'
+    },
+    // The routine used for matching which pages this script should be included for. If all requests, just return true.
+    matchRoutine: (config, req, protocol, host, finalBody) => {
+      // Match only jsp pages
+      if (req.url.indexOf('dynoGallery=true') > -1){
+        return req.url.includes('.jsp');
+      }
+      return false;
+    },
+
+  // Links To Inject
+  linksToInject: [{
+    // The link ref type
+    ref: 'stylesheet',
+    // The path of the script to include
+    path: '/styles/someStylesheet.css',
     // Indicates if the script should be added before the closing head tag instead of the closing body tag
     loadInHead: false,
     // URL match pattern for which pages the script should be injected
@@ -228,6 +257,14 @@ Array defining the secondary sites to proxy as well to handle redirects to/from 
 #### forceHttpLocationRedirects
 
 Forces location based redirects to use http vs https
+
+#### includeLocalWebsocketProxy
+
+Adds a proxy for websockets to the port of your choosing. Used for HMR in a Webpack system.
+
+#### localWebsocketPort
+
+The localhost port the Webpack HMR websocket is listening on
 
 #### localRoutes
 

@@ -39,6 +39,9 @@ function HCDev(tmpConfig) {
     finalBody = finalBody.replace(remoteHostRegex, newHost + ":" + newPort);
 
     if (!skipInjectionAndCustomCleanup) {
+      // Custom link To Inject
+      finalBody = this.injectCustomLinks(req, currentUrl.protocol, currentUrl.host, finalBody);
+
       // Custom Scripts To Inject
       finalBody = this.injectCustomScripts(req, currentUrl.protocol, currentUrl.host, finalBody);
 
@@ -65,6 +68,29 @@ function HCDev(tmpConfig) {
 
         // Insert before closing head if specified
         if (script.loadInHead) {
+          insertionLocation = finalBody.lastIndexOf('</head>') > -1 ? finalBody.lastIndexOf('</head>') : insertionLocation;
+        }
+
+        // Perform insertion
+        finalBody = finalBody.insert(insertionLocation, injectionHTML);
+      }
+    });
+
+    return finalBody;
+  }
+
+  this.injectCustomLinks = (req, protocol, host, finalBody) => {
+
+    // Loop thru custom links
+    this.config.linksToInject.forEach((link) => {
+      if ((link.pattern != undefined && link.pattern.test(req.url)) || (link.matchRoutine != undefined && link.matchRoutine(this.config, req, protocol, host, finalBody))) {
+
+        // Perform gallery page injection
+        let insertionLocation = finalBody.lastIndexOf('</body>');
+        let injectionHTML = '<link ref="' + link.ref + '" src="' + link.path + '" />';
+
+        // Insert before closing head if specified
+        if (link.loadInHead) {
           insertionLocation = finalBody.lastIndexOf('</head>') > -1 ? finalBody.lastIndexOf('</head>') : insertionLocation;
         }
 
@@ -346,6 +372,10 @@ function HCDev(tmpConfig) {
   }
 
   this.GetBrowserSyncConfig = () => {
+    const builtInProxies = [];
+    if(this.config.includeLocalWebsocketProxy) {
+      builtInProxies.push(proxyMiddleware('/sockjs-node', { target: 'ws://locahost:' + this.config.localWebsocketPort, changeOrigin: true, ws: true }));
+    }
     return {
       open: true,
       port: this.config.port,
@@ -363,6 +393,7 @@ function HCDev(tmpConfig) {
         secure: false,
         baseDir: './',
         middleware: [
+          ...builtInProxies,
           proxyMiddleware(this.GetHttpProxyMiddlewareConfig())
         ],
         routes: this.GetServerRoutes()

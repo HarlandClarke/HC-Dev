@@ -35,6 +35,16 @@ const schema = createSchema(joi => {
     matchRoutine: joi.func().arity(5)
   })
 
+  const linkToInject = joi.object().keys({
+    ref: joi.string().required(),
+    path: joi.string().required(),
+    loadAsync: joi.boolean().required(),
+    loadInHead: joi.boolean().required(),
+    pattern: joi.any(),
+    customRoute: joi.any(),
+    matchRoutine: joi.func().arity(5)
+  })
+
   return joi.object({
     port: joi.number().required(),
     uiPort: joi.number(),
@@ -46,12 +56,15 @@ const schema = createSchema(joi => {
     remoteRoutes: joi.array().items(remoteRoute),
     matchPatterns: joi.array().items(joi.string()),
     scriptsToInject: joi.array().items(scriptToInject),
+    linksToInject: joi.array().items(linkToInject),
     customCleanResponseBody: joi.func().minArity(5).maxArity(7),
     validateCerts: joi.boolean(),
     changeOrigin: joi.boolean(),
     autoRewrite: joi.boolean(),
     corsOptions: joi.any(),
     forceHttpLocationRedirects: joi.boolean(),
+    includeLocalWebsocketProxy: joi.boolean(),
+    localWebsocketPort: joi.number()
   })
 })
 
@@ -90,6 +103,9 @@ exports.defaults = () => ({
   // Scripts To Inject
   scriptsToInject: [],
 
+  // Links To Inject
+  linksToInject: [],
+
   // Function for defining what
   customCleanResponseBody: undefined,
 
@@ -106,6 +122,12 @@ exports.defaults = () => ({
   corsOptions: undefined,
 
   // forceHttpLocationRedirects
-  forceHttpLocationRedirects: true
+  forceHttpLocationRedirects: true, 
+
+  // Include local websocket redirect for HMR
+  includeLocalWebsocketProxy: false,
+
+  // Default local websocket port
+  localWebsocketPort: 8080
 
 })
