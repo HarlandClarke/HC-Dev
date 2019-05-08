@@ -182,8 +182,8 @@ module.exports = {
 
   // Links To Inject
   linksToInject: [{
-    // The link ref type
-    ref: 'stylesheet',
+    // The link rel type
+    rel: 'stylesheet',
     // The path of the script to include
     path: '/styles/someStylesheet.css',
     // Indicates if the script should be added before the closing head tag instead of the closing body tag
