@@ -37,8 +37,9 @@ const schema = createSchema(joi => {
 
   const linkToInject = joi.object().keys({
     rel: joi.string().required(),
-    path: joi.string().required(),
-    loadAsync: joi.boolean().required(),
+    type: joi.string(),
+    href: joi.string().required(),
+    as: joi.string(),
     loadInHead: joi.boolean().required(),
     pattern: joi.any(),
     customRoute: joi.any(),

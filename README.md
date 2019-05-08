@@ -184,11 +184,15 @@ module.exports = {
   linksToInject: [{
     // The link rel type
     rel: 'stylesheet',
-    // The path of the script to include
-    path: '/styles/someStylesheet.css',
-    // Indicates if the script should be added before the closing head tag instead of the closing body tag
+    // The link type
+    type: 'text/css',
+    // The path of the link to include
+    href: '/styles/someStylesheet.css',
+    // The as command, useful to specifiy how a preloaded link should be loaded
+    as: 'style',
+    // Indicates if the link should be added before the closing head tag instead of the closing body tag
     loadInHead: false,
-    // URL match pattern for which pages the script should be injected
+    // URL match pattern for which pages the link should be injected
     pattern: new RegEx('.jsp','g'),
     // The custom route which needs to be overriden. Similar to the localRoute above, but specific to this script. (optional)
     customRoute: {

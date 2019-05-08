@@ -87,7 +87,15 @@ function HCDev(tmpConfig) {
 
         // Perform gallery page injection
         let insertionLocation = finalBody.lastIndexOf('</body>');
-        let injectionHTML = '<link rel="' + link.rel + '" src="' + link.path + '" />';
+        let injectionHTML = '<link rel="' + link.rel + '"';
+        if(link.type && link.type.length > 0) {
+          injectionHTML += ' type="' + link.type + '"';
+        }
+        injectionHTML += ' href="' + link.href + '"';
+        if(link.as && link.as.length > 0) {
+          injectionHTML += ' as="' + link.as + '"';
+        }
+        injectionHTML += '>';
 
         // Insert before closing head if specified
         if (link.loadInHead) {
