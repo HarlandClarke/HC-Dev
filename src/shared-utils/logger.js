@@ -4,7 +4,7 @@ const readline = require('readline')
 
 const format = (label, msg) => {
   return msg.split('\n').map((line, i) => {
-    return `${label} ${line}`;
+    return `${label} ${line}\n`;
     /*
     return i === 0 ?
       `${label} ${line}\n` :
