@@ -1,13 +1,15 @@
 const chalk = require('chalk')
 const readline = require('readline')
-const padStart = require('string.prototype.padstart')
+// const padStart = require('string.prototype.padstart')
 
 const format = (label, msg) => {
   return msg.split('\n').map((line, i) => {
+    return `${label} ${line}`;
+    /*
     return i === 0 ?
-      `${label} ${line}` :
+      `${label} ${line}\n` :
       padStart(line, chalk.reset(label).length)
-  }).join('\n')
+  }).join('\n')*/
 }
 
 const chalkTag = msg => chalk.bgBlackBright.white.dim(` ${msg} `)
